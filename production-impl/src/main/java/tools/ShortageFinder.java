@@ -34,6 +34,8 @@ public class ShortageFinder {
      * other stick to single schema per product. By manual adjustments of demand,
      * customer always specifies desired delivery schema
      * (increase amount in scheduled transport or organize extra transport at given time)
+     *
+     * TODO algorithm is finding wrong shortages, when more productions is planned in a single day
      */
     public static List<ShortageEntity> findShortages(LocalDate today, int daysAhead, CurrentStock stock,
                                                      List<ProductionEntity> productions, List<DemandEntity> demands) {
@@ -52,8 +54,6 @@ public class ShortageFinder {
             demandsPerDay.put(demand1.getDay(), demand1);
         }
 
-        // TODO ASK including locked or only proper parts
-        // TODO ASK current stock or on day start? what if we are in the middle of production a day?
         long level = stock.getLevel();
 
         List<ShortageEntity> gap = new LinkedList<>();
@@ -89,11 +89,11 @@ public class ShortageFinder {
                 ShortageEntity entity = new ShortageEntity();
                 entity.setRefNo(productRefNo);
                 entity.setFound(LocalDate.now());
+                entity.setMissing(levelOnDelivery * -1L);
                 entity.setAtDay(day);
                 gap.add(entity);
             }
             long endOfDayLevel = level + produced - Util.getLevel(demand);
-            // TODO: ASK accumulated shortages or reset when under zero?
             level = endOfDayLevel >= 0 ? endOfDayLevel : 0;
         }
         return gap;
