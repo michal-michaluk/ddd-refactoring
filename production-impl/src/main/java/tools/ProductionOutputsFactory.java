@@ -3,7 +3,10 @@ package tools;
 import entities.ProductionEntity;
 import shortage.prediciton.ProductionOutputs;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ProductionOutputsFactory {
     private final List<ProductionEntity> productions;
@@ -13,6 +16,16 @@ public class ProductionOutputsFactory {
     }
 
     public ProductionOutputs createProductionOutputs() {
-        return new ProductionOutputs(productions);
+        Map<LocalDate, Long> outputs = productions.stream()
+                .collect(Collectors.groupingBy(
+                        production -> production.getStart().toLocalDate(),
+                        Collectors.summingLong(ProductionEntity::getOutput)
+                ));
+
+        String productRefNo = productions.stream()
+                .map(production -> production.getForm().getRefNo())
+                .findFirst()
+                .orElse(null);
+        return new ProductionOutputs(productRefNo, outputs);
     }
 }

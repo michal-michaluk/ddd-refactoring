@@ -1,46 +1,37 @@
 package shortage.prediciton;
 
-import entities.DemandEntity;
 import enums.DeliverySchema;
-import tools.Util;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Demands {
 
-    private final Map<LocalDate, DemandEntity> demandsPerDay;
+    private final Map<LocalDate, Demand> demandsPerDay;
 
-    public Demands(List<DemandEntity> demands) {
-        demandsPerDay = new HashMap<>();
-        for (DemandEntity demand1 : demands) {
-            demandsPerDay.put(demand1.getDay(), demand1);
-        }
+    public Demands(Map<LocalDate, Demand> demandsPerDay) {
+        this.demandsPerDay = demandsPerDay;
     }
 
     public Demand get(LocalDate day) {
-        if (demandsPerDay.containsKey(day)) {
-            return new Demand(demandsPerDay.get(day));
-        } else {
-            return null;
-        }
+        return demandsPerDay.getOrDefault(day, null);
     }
 
     public static class Demand {
-        private final DemandEntity demand;
+        private final long level;
+        private final DeliverySchema deliverySchema;
 
-        public Demand(DemandEntity demand) {
-            this.demand = demand;
+        public Demand(DeliverySchema deliverySchema, long level) {
+            this.deliverySchema = deliverySchema;
+            this.level = level;
         }
 
         public boolean hasDeliverySchema(DeliverySchema schema) {
-            return Util.getDeliverySchema(demand) == schema;
+            return deliverySchema == schema;
         }
 
         public long getLevel() {
-            return Util.getLevel(demand);
+            return level;
         }
     }
 }
